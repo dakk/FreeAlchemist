@@ -32,6 +32,10 @@ import time
 import sys
 import random
 
+width = 6
+size_x = 10
+size_y = 8
+
 class freealchemist:
 	def __init__(self):
 		self.grid = []
@@ -93,9 +97,9 @@ class freealchemist:
 		# Riempie la griglia
 		self.grid = []
 
-		for x in xrange(10):
+		for x in xrange(size_x):
 			line = [] 
-			for y in xrange(8):
+			for y in xrange(size_y):
 				line.append(0)			
 			self.grid.append(line)
 
@@ -111,19 +115,24 @@ class freealchemist:
 
 
 	def genBlock(self):
+		self.unBorder()
 		self.blockgrid = self.nextblock
 
 		if random.randint(1,30) == 25: 
 			self.nextblock = [[random.randint(14,16),random.randint(1,self.lim)],[0,0]]
-		else:				
+		else:			
 			self.nextblock = [[random.randint(1,self.lim),random.randint(1,self.lim)],[0,0]]
 
-						
+	def onBoard(self, x, y):
+		return x >= 0 and x < len(self.grid) and y >= 0 and y < len(self.grid[0])
+
+	def test(self, x, y, dx1, dy1, dx2, dy2, t):
+		return self.onBoard(x+dx1,y+dy1) and self.onBoard(x+dx2,y+dy2) and self.grid[x+dx1][y+dy1] == t and self.grid[x+dx2][y+dy2] == t
 			
 	def updateGame(self):
 		# Controlla se ci son spazi vuoti da riempire
 		md = False
-		for x in xrange(len(self.grid)-1,0,-1):
+		for x in xrange(len(self.grid)-1,-1,-1):
 			for y in xrange(0, len(self.grid[0])):
 				s = 0
 				for a in xrange(len(self.grid)): s += self.grid[a][y]
@@ -138,8 +147,8 @@ class freealchemist:
 
 		# Controlliamo se possiamo far esplodere qualcosa :P
 		if not self.mov:
-			for x in xrange(-1,len(self.grid)-1):		
-				for y in xrange(-1,len(self.grid[0])-1):
+			for x in xrange(0,len(self.grid)):		
+				for y in xrange(0,len(self.grid[0])):
 					# La pressa
 					if self.grid[x][y] == 15 and x == len(self.grid)-2:
 							self.grid[len(self.grid)-2][y] = 0
@@ -153,38 +162,37 @@ class freealchemist:
 					# Bomba 1
 					elif self.grid[x][y] == 14:
 						self.grid[x][y] = 0
-						if y-1 != -1:			self.grid[x][y-1] = 0
-						if y+1 < len(self.grid[0]):	self.grid[x][y+1] = 0
-						if x+1 < len(self.grid): 	self.grid[x+1][y] = 0
-						if x-1 != -1:		 	self.grid[x-1][y] = 0
+						if self.onBoard (x,y-1):	self.grid[x][y-1] = 0
+						if self.onBoard (x,y+1):	self.grid[x][y+1] = 0
+						if self.onBoard (x+1,y): 	self.grid[x+1][y] = 0
+						if self.onBoard (x-1,y): 	self.grid[x-1][y] = 0
 
 					# Bomba 2
 					elif self.grid[x][y] == 16:
 						self.grid[x][y] = 0
-						if y-1 != -1:			self.grid[x][y-1] = 0
-						if y+1 < len(self.grid[0]):	self.grid[x][y+1] = 0
-						if x+1 < len(self.grid): 	self.grid[x+1][y] = 0
-						if x-1 != -1:		 	self.grid[x-1][y] = 0
-						if y-1 != -1 and x-1 != -1:					self.grid[x-1][y-1] = 0
-						if y+1 < len(self.grid[0]) and x+1 < len(self.grid):		self.grid[x+1][y+1] = 0
-						if x+1 < len(self.grid) and y-1 != -1: 				self.grid[x+1][y-1] = 0
-						if x-1 != -1 and y+1 < len(self.grid[0]):		 	self.grid[x-1][y+1] = 0
-						if y-2 != -2:			self.grid[x][y-2] = 0
-						if y+2 < len(self.grid[0]):	self.grid[x][y+2] = 0
-						if x+2 < len(self.grid): 	self.grid[x+2][y] = 0
-						if x-2 != -2:		 	self.grid[x-2][y] = 0
+						if self.onBoard (x,y-1):	self.grid[x][y-1] = 0
+						if self.onBoard (x,y+1):	self.grid[x][y+1] = 0
+						if self.onBoard (x+1,y):	self.grid[x+1][y] = 0
+						if self.onBoard (x-1,y):	self.grid[x-1][y] = 0
+						if self.onBoard (x-1,y-1):	self.grid[x-1][y-1] = 0
+						if self.onBoard (x+1,y+1):	self.grid[x+1][y+1] = 0
+						if self.onBoard (x+1,y-1):	self.grid[x+1][y-1] = 0
+						if self.onBoard (x-1,y+1):	self.grid[x-1][y+1] = 0
+						if self.onBoard (x,y-2):	self.grid[x][y-2] = 0
+						if self.onBoard (x,y+2):	self.grid[x][y+2] = 0
+						if self.onBoard (x+2,y):	self.grid[x+2][y] = 0
+						if self.onBoard (x-2,y):	self.grid[x-2][y] = 0
 
 
 					# Normale
 					elif self.grid[x][y] != 0 and self.grid[x][y] < 13:
 						t = self.grid[x][y]
-						if (self.grid[x][y+1] == t and self.grid[x][y-1] == t) or (self.grid[x+1][y] == t and self.grid[x-1][y] == t) or (self.grid[x+1][y] == t and self.grid[x][y+1] == t) or (self.grid[x-1][y] == t and self.grid[x][y-1] == t)  or (self.grid[x-1][y] == t and self.grid[x][y+1] == t) or (self.grid[x+1][y] == t and self.grid[x][y-1] == t): 
-								if self.grid[x][y] < 12: self.grid[x][y] += 1
+						if self.test (x, y, 0, 1, 0, -1, t) or self.test (x, y, 1, 0, -1, 0, t) or self.test (x, y, 1, 0, 0, 1, t) or self.test (x, y, -1, 0, 0, -1, t) or self.test (x, y, -1, 0, 0, 1, t) or self.test (x, y, 1, 0, 0, -1, t):
+								#upgrade our center piece
+								if t < 12: self.grid[x][y] += 1
 								else: self.grid[x][y] = 0
-								if self.grid[x][y+1] == t: self.grid[x][y+1] = 0
-								if self.grid[x][y-1] == t: self.grid[x][y-1] = 0
-								if self.grid[x+1][y] == t: self.grid[x+1][y] = 0
-								if self.grid[x-1][y] == t: self.grid[x-1][y] = 0
+								#explode the touching pieces
+								self.explode(x,y,t)
 								self.points += (t*10)+t*t
 
 						if t-1 > self.lim and t-1 < 13: self.lim += 1
@@ -201,7 +209,23 @@ class freealchemist:
 			elif sum(self.grid[1]) > 0: self.fail += 1
 			else: self.fail = 0 
 		if self.fail > 2: self.over = True
-
+		
+	
+	#Explode the piece at position x,y if type == t
+	#and also explode all touching pieces of the same type.
+	def explode(self,x,y,t) :
+		if self.grid[x][y] == t :
+			self.grid[x][y] = 0
+		#recursively explode touching pieces of the same type
+		if (y > 0) :
+			if self.grid[x][y-1] == t: self.explode(x,y-1,t)
+		if (y < len(self.grid[0])-1) :
+			if self.grid[x][y+1] == t: self.explode(x,y+1,t)
+		if (x > 0) :
+			if self.grid[x-1][y] == t: self.explode(x-1,y,t)
+		if  (x < len(self.grid)-1) :
+ 			if self.grid[x+1][y] == t: self.explode(x+1,y,t)
+		
 
 
 	def renderGame(self):
@@ -243,6 +267,33 @@ class freealchemist:
 		print "[*] Exit"
 		sys.exit()
 		
+	
+	def goLeft(self):
+		#the left pieces of the square blockpos
+		left_part = [self.blockgrid[0][0], self.blockgrid[1][0]] 
+		if self.blockpos > 0: 
+			self.blockpos -= 1
+		#if we are on the extreme left, we still can go further
+		#at least if our pieces are vertical
+		elif self.blockpos == 0 and left_part == [0,0] :
+			self.blockpos -= 1
+		
+	
+	def goRight(self):
+		#the right pieces of the square blockpos
+		right_part = [self.blockgrid[0][1], self.blockgrid[1][1]] 
+		if self.blockpos < width: 
+			self.blockpos += 1
+		#if we are on the extreme right, we still can go further
+		#at least if our pieces are vertical
+		elif self.blockpos == width and right_part == [0,0] :
+			self.blockpos += 1
+			
+	def unBorder(self):
+		if self.blockpos == width+1 :
+			self.goLeft()
+		if self.blockpos == -1 :
+			self.goRight()
 
 
 	def keyInputs(self):
@@ -253,26 +304,33 @@ class freealchemist:
 			elif event.type == KEYDOWN:
 				if not self.mov: 				
 					if event.key == K_UP: 
+						self.unBorder()
 						old = self.blockgrid[0] + self.blockgrid[1]
 						self.blockgrid = [[old[2],old[0]],[old[3],old[1]]]
 
 					elif event.key == K_DOWN: 
+						self.unBorder()
 						old = self.blockgrid[0] + self.blockgrid[1]
 						self.blockgrid = [[old[1],old[3]],[old[0],old[2]]]
 	
-					elif event.key == K_RIGHT: 
-						if self.blockpos < 6: self.blockpos += 1
+					elif event.key == K_RIGHT:
+						self.goRight()
 	
 					elif event.key == K_LEFT: 
-						if self.blockpos > 0: self.blockpos -= 1
+						self.goLeft()
 
 					elif event.key == K_SPACE:
 						self.mov = True
 						self.points += 10
-						self.grid[0][self.blockpos] = self.blockgrid[0][0]
-						self.grid[0][self.blockpos+1] = self.blockgrid[0][1]
-						self.grid[1][self.blockpos] = self.blockgrid[1][0]
-						self.grid[1][self.blockpos+1] = self.blockgrid[1][1]
+						#We set only the non zero pieces
+						if self.blockgrid[0][0] != 0 :
+							self.grid[0][self.blockpos] = self.blockgrid[0][0]
+						if self.blockgrid[0][1] != 0 :
+							self.grid[0][self.blockpos+1] = self.blockgrid[0][1]
+						if self.blockgrid[1][0] != 0 :
+							self.grid[1][self.blockpos] = self.blockgrid[1][0]
+						if self.blockgrid[1][1] != 0 :
+							self.grid[1][self.blockpos+1] = self.blockgrid[1][1]
 						self.blockgrid[0][0] = -1
 
 				if event.key == K_PAUSE or event.key == K_ESCAPE or event.key == K_p:
