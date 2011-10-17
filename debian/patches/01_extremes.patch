@@ -1,0 +1,95 @@
+diff -Nurp freealchemist-0.4.orig/freealchemist.py freealchemist-0.4/freealchemist.py
+--- freealchemist-0.4.orig/freealchemist.py	2008-07-04 22:53:20.000000000 +0200
++++ freealchemist-0.4/freealchemist.py	2008-09-29 18:09:40.227058997 +0200
+@@ -32,6 +32,8 @@ import time
+ import sys
+ import random
+ 
++width = 6
++
+ class freealchemist:
+ 	def __init__(self):
+ 		self.grid = []
+@@ -111,6 +113,7 @@ class freealchemist:
+ 
+ 
+ 	def genBlock(self):
++		self.unBorder()
+ 		self.blockgrid = self.nextblock
+ 
+ 		if random.randint(1,30) == 25: 
+@@ -243,6 +246,33 @@ class freealchemist:
+ 		print "[*] Exit"
+ 		sys.exit()
+ 		
++	
++	def goLeft(self):
++		#the left pieces of the square blockpos
++		left_part = [self.blockgrid[0][0], self.blockgrid[1][0]] 
++		if self.blockpos > 0: 
++			self.blockpos -= 1
++		#if we are on the extreme left, we still can go further
++		#at least if our pieces are vertical
++		elif self.blockpos == 0 and left_part == [0,0] :
++			self.blockpos -= 1
++		
++	
++	def goRight(self):
++		#the right pieces of the square blockpos
++		right_part = [self.blockgrid[0][1], self.blockgrid[1][1]] 
++		if self.blockpos < width: 
++			self.blockpos += 1
++		#if we are on the extreme right, we still can go further
++		#at least if our pieces are vertical
++		elif self.blockpos == width and right_part == [0,0] :
++			self.blockpos += 1
++			
++	def unBorder(self):
++		if self.blockpos == width+1 :
++			self.goLeft()
++		if self.blockpos == -1 :
++			self.goRight()
+ 
+ 
+ 	def keyInputs(self):
+@@ -253,26 +283,33 @@ class freealchemist:
+ 			elif event.type == KEYDOWN:
+ 				if not self.mov: 				
+ 					if event.key == K_UP: 
++						self.unBorder()
+ 						old = self.blockgrid[0] + self.blockgrid[1]
+ 						self.blockgrid = [[old[2],old[0]],[old[3],old[1]]]
+ 
+ 					elif event.key == K_DOWN: 
++						self.unBorder()
+ 						old = self.blockgrid[0] + self.blockgrid[1]
+ 						self.blockgrid = [[old[1],old[3]],[old[0],old[2]]]
+ 	
+-					elif event.key == K_RIGHT: 
+-						if self.blockpos < 6: self.blockpos += 1
++					elif event.key == K_RIGHT:
++						self.goRight()
+ 	
+ 					elif event.key == K_LEFT: 
+-						if self.blockpos > 0: self.blockpos -= 1
++						self.goLeft()
+ 
+ 					elif event.key == K_SPACE:
+ 						self.mov = True
+ 						self.points += 10
+-						self.grid[0][self.blockpos] = self.blockgrid[0][0]
+-						self.grid[0][self.blockpos+1] = self.blockgrid[0][1]
+-						self.grid[1][self.blockpos] = self.blockgrid[1][0]
+-						self.grid[1][self.blockpos+1] = self.blockgrid[1][1]
++						#We set only the non zero pieces
++						if self.blockgrid[0][0] != 0 :
++							self.grid[0][self.blockpos] = self.blockgrid[0][0]
++						if self.blockgrid[0][1] != 0 :
++							self.grid[0][self.blockpos+1] = self.blockgrid[0][1]
++						if self.blockgrid[1][0] != 0 :
++							self.grid[1][self.blockpos] = self.blockgrid[1][0]
++						if self.blockgrid[1][1] != 0 :
++							self.grid[1][self.blockpos+1] = self.blockgrid[1][1]
+ 						self.blockgrid[0][0] = -1
+ 
+ 				if event.key == K_PAUSE or event.key == K_ESCAPE or event.key == K_p:

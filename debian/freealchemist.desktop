@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=FreeAlchemist
+Comment=A simpler figure block game
+Icon=freealchemist
+Exec=/usr/games/freealchemist
+Terminal=false
+Type=Application
+Categories=Game;BlocksGame;

@@ -1,0 +1,3 @@
+?package(freealchemist):needs="X11" section="Games/Blocks"\
+	title="FreeAlchemist" command="/usr/games/freealchemist"\
+	icon="/usr/share/pixmaps/freealchemist.xpm"
