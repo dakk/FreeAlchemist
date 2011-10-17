@@ -385,7 +385,7 @@ class freealchemist:
 
 		self.screen.blit(pygame.font.Font(None, 24).render("Press any key", 1, (255, 255, 255)), (416-120,400-20))
     		self.screen.blit(pygame.font.Font(None, 22).render("Coded by "+__author__+" under "+__license__+" license", 1, (255, 255, 255)), (48,220))
-    		self.screen.blit(pygame.font.Font(None, 22).render("http://pygame.org   "+__email__, 1, (255, 255, 255)), (48,240))
+    		self.screen.blit(pygame.font.Font(None, 22).render("http://inventati.org/dak   "+__email__, 1, (255, 255, 255)), (48,240))
 
 		pygame.display.update()
 
